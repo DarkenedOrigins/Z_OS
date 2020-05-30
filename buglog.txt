@@ -1,0 +1,78 @@
+Checkpoint 1
+bug0:
+	Mar 7, 2018 - gdt triple faults when entering kernel
+	fixed:6e584563 
+		Rewrote the LGDT function to give the proper size to the hardware
+bug1: 
+	Mar 11, 2018 - keyboard doesn't send interrupts
+	fixed:54d828a6
+		Had to send EOI in IRQ wrapper
+bug2:
+	Mar 11, 2018 - Interrupt test does not pass
+	fixed: 2160e91b 
+		Had to edit the tests to account for syscalls entry
+
+
+Checkpoint 2
+bug0:
+	Mar 25, 2018 - Experienced occasional page fault when running some filesystem functions
+	fixed: a4c9b384 
+		Had to add NULL checks to FS functions
+
+
+Checkpoint 3
+bug0: 
+	March 30, 2018 - Min heap does not always return correct value
+	fixed: e15c424a 
+		Had to heapify up all elements, not just one
+bug1:
+	March 29, 2018 - Found only twenty processes could be run in total on one terminal before page fault
+	fixed: 787e63d8
+		Needed to properly reset esp0 when halting a process (stack was imbalanced, we would eventually write over the PCB)
+bug2:
+	April 5, 2018 - Base shells page fault when exiting
+	fixed: 270574ea 
+		On halt, the esp0 was being set to the bottom of the parent kernel stack, so our execute stack teardown would cross the 8MB boundary
+		Instead we now just track the parent processes' esp and use that instead.
+bug3:
+	April 6, 2018 - RTC open has unexpected behavior - sometimes blocked forever
+	fixed: d2600267 
+		RTC open was always returning a 0 instead of the generated FD
+
+
+Checkpoint 4
+
+No major bugs for checkpoint 4
+The syscalls getargs and vidmap were implemented without issue
+(Many small fixes and checks for checkpoint 3 were found in this time period)
+
+Checkpoint 5
+bug0: 
+	April 14, 2018 - Pit does not generate interrupts properly
+	fixed: 5c658518 
+		Had to properly initialize the Frequency of the PIT
+bug1:
+	April 14, 2018 - Terminal read and write have unexpected behavior with multiple terminals
+	fixed: a1ecb02c 
+		Had to virtualize terminal properties and fields
+bug2: 
+	April 15, 2018 - RTC improperly accepts invalid file descriptors
+	fixed: b04b783d
+		Added bounds checking to RTC functions
+bug3:
+	April 18, 2018 - RTC Read sometimes blocks forever
+	fixed: 4c4ade21
+		RTC Read needs to return if the global clock is greater than (not just equal to) the wait time
+bug4:
+	April 18, 2018 - Terminals sometimes overlap outputs when switching terminals fast
+	fixed: 4c4ade21
+		Had to add cli/sti when switching terminals
+bug5:
+	April 19, 2018 - keyboard accepts input after enter if keys pressed very quickly
+	fixed: fa18b5c9 
+		Fixed by ignoring keypresses if the current terminal is already returned (without finishing terminal_read)
+bug6:
+	April 28 , 2018 Fish doesn't disappear when switching terminals
+	fixed: a877b01c 
+		Video memory was not being virtualized between processes correctly. Every terminal gets its own virtual video memory page,
+		and we switch this on context switch.
